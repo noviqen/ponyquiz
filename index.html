@@ -9,7 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#a3123f">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐴</text></svg>">
-  <link rel="stylesheet" href="style.css?v=1">
+  <link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
   <header>
@@ -26,19 +26,22 @@
         <h1>Ken jij de pony's van<br><span>Manege Hooidonk?</span></h1>
         <p>Raad de namen, verzamel alle pony's en ontdek de leukste weetjes!</p>
       </div>
+      <h3 class="kopje">🐴 Pony's raden</h3>
       <div class="modi">
-        <button class="modus" data-modus="foto">
-          <span class="emoji">📸</span>
-          <span><b>Wie is dit?</b><small>Je ziet een foto. Welke naam hoort erbij?</small></span>
-        </button>
-        <button class="modus" data-modus="weetje">
-          <span class="emoji">🔎</span>
-          <span><b>Wie ben ik?</b><small>Lees het weetje. Welke pony is het?</small></span>
-        </button>
-        <button class="modus" data-modus="stal">
-          <span class="emoji">🏠</span>
-          <span><b>De stal</b><small>Bekijk alle pony's en lees hun verhaal</small></span>
-        </button>
+        <button class="modus" data-modus="foto"><span class="emoji">📸</span><span><b>Wie is dit?</b><small>Je ziet een foto. Welke naam hoort erbij?</small></span></button>
+        <button class="modus" data-modus="weetje"><span class="emoji">🔎</span><span><b>Wie ben ik?</b><small>Lees het weetje. Welke pony is het?</small></span></button>
+        <button class="modus" data-modus="trivia"><span class="emoji">🧠</span><span><b>Pony-trivia</b><small>Wie is het oudst? Wie zwemt graag? Wie is wiens beste vriend?</small></span></button>
+      </div>
+      <h3 class="kopje">🏇 De manege</h3>
+      <div class="modi">
+        <button class="modus" data-modus="manege"><span class="emoji">🏇</span><span><b>Manege-weetjes</b><small>Kampen, kinderfeestjes, disco-ponyrijden en wat draag je op een pony?</small></span></button>
+      </div>
+      <h3 class="kopje">🎮 Spelletjes</h3>
+      <div class="modi twee">
+        <button class="modus klein" data-modus="snel"><span class="emoji">⏱️</span><span><b>Snelle ronde</b><small>Zoveel mogelijk in 60 seconden!</small></span></button>
+        <button class="modus klein" data-modus="memory"><span class="emoji">🃏</span><span><b>Memory</b><small>Zoek de foto bij de naam</small></span></button>
+        <button class="modus klein" data-modus="mix"><span class="emoji">🎲</span><span><b>Grote mix</b><small>Van alles door elkaar</small></span></button>
+        <button class="modus klein" data-modus="stal"><span class="emoji">🏠</span><span><b>De stal</b><small>Alle pony's en hun verhaal</small></span></button>
       </div>
       <p class="record" id="record"></p>
     </section>
@@ -50,6 +53,7 @@
         <div class="balk"><i id="balk"></i></div>
         <span class="punten">⭐ <b id="punten">0</b></span>
         <span class="reeks" id="reeks" hidden>🔥 <b></b></span>
+        <span class="klok" id="klok" hidden>⏱️ <b>60</b></span>
       </div>
       <h2 id="vraag"></h2>
       <div id="vraagFoto" class="vraagfoto"><img alt="Welke pony is dit?"></div>
@@ -58,17 +62,30 @@
 
       <div id="uitleg" class="uitleg" hidden>
         <div class="uitleg-kop">
-          <img id="uitlegFoto" alt="">
+          <img id="uitlegFoto" alt=""><span id="uitlegEmoji" class="uitleg-emoji" hidden></span>
           <div>
             <p id="uitlegOordeel" class="oordeel"></p>
             <p class="uitleg-naam" id="uitlegNaam"></p>
           </div>
         </div>
         <p id="uitlegTekst"></p>
+        <p id="uitlegBron" class="bron"></p>
         <div class="knoppen">
           <button id="volgende" class="knop">Volgende ▶</button>
         </div>
       </div>
+    </section>
+
+    <!-- MEMORY -->
+    <section id="memory" class="scherm">
+      <div class="voortgang">
+        <span>🃏 Memory</span>
+        <div class="balk"><i id="memBalk"></i></div>
+        <span>👆 <b id="memZetten">0</b></span>
+      </div>
+      <p class="sub" style="text-align:center;margin-top:10px">Draai twee kaartjes om: zoek bij elke foto de juiste naam!</p>
+      <div id="memBord" class="memory"></div>
+      <p id="memMelding" class="memmelding"></p>
     </section>
 
     <!-- EINDE -->
@@ -107,6 +124,7 @@
   <div id="confetti" aria-hidden="true"></div>
 
   <script src="data.js?v=1"></script>
-  <script src="app.js?v=2"></script>
+  <script src="vragen.js?v=1"></script>
+  <script src="app.js?v=3"></script>
 </body>
 </html>

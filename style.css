@@ -123,3 +123,32 @@ footer a { color: var(--rood); }
 #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 30; overflow: hidden; }
 #confetti i { position: absolute; top: -20px; width: 10px; height: 14px; border-radius: 2px; animation: val 2.4s ease-in forwards; }
 @keyframes val { to { transform: translateY(110vh) rotate(720deg); opacity: .8; } }
+
+/* --- v2: meer spellen --- */
+.kopje { margin: 18px 4px 8px; font-size: 1.05rem; color: var(--bruin); }
+.modi.twee { grid-template-columns: 1fr 1fr; }
+.modus.klein { flex-direction: column; text-align: center; gap: 4px; padding: 14px 10px; }
+.modus.klein .emoji { font-size: 2rem; }
+.modus.klein b { font-size: 1.05rem; }
+.modus.klein small { font-size: .85rem; }
+#vraag.lang { font-size: 1.15rem; line-height: 1.35; }
+.keuzes.breed { grid-template-columns: 1fr; }
+.keuzes.breed .keuze { min-height: 52px; font-size: 1.02rem; }
+.klok { color: var(--rood); }
+.klok.bijna { color: var(--fout); animation: puls .6s infinite; }
+.uitleg-emoji { width: 72px; height: 72px; border-radius: 50%; background: var(--rood-licht); display: grid; place-items: center; font-size: 2.3rem; flex-shrink: 0; }
+.uitleg-emoji[hidden] { display: none; }
+.bron { font-size: .8rem; color: var(--bruin); margin: -4px 0 12px; }
+
+.memory { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+@media (min-width: 520px) { .memory { grid-template-columns: repeat(4, 1fr); } }
+.memkaart { aspect-ratio: 1; perspective: 600px; padding: 0; }
+.memkaart .binnen { position: relative; width: 100%; height: 100%; transition: transform .45s; transform-style: preserve-3d; }
+.memkaart.om .binnen { transform: rotateY(180deg); }
+.memkaart .voor, .memkaart .achter { position: absolute; inset: 0; border-radius: 14px; backface-visibility: hidden; display: grid; place-items: center; overflow: hidden; box-shadow: 0 3px 0 #0002; }
+.memkaart .voor { background: linear-gradient(135deg, var(--rood), #d6336c); font-size: 2.2rem; }
+.memkaart .achter { transform: rotateY(180deg); background: #fff; }
+.memkaart .achter img { width: 100%; height: 100%; object-fit: cover; }
+.memkaart .achter.naam span { font-weight: 800; padding: 6px; font-size: 1rem; color: var(--rood); text-align: center; }
+.memkaart.gevonden .achter { outline: 4px solid var(--groen); outline-offset: -4px; animation: pop .4s; }
+.memmelding { text-align: center; font-weight: 700; min-height: 3em; margin-top: 12px; }
