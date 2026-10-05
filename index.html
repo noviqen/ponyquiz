@@ -9,7 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#a3123f">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐴</text></svg>">
-  <link rel="stylesheet" href="style.css?v=2">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
   <header>
@@ -35,6 +35,13 @@
       <h3 class="kopje">🏇 De manege</h3>
       <div class="modi">
         <button class="modus" data-modus="manege"><span class="emoji">🏇</span><span><b>Manege-weetjes</b><small>Kampen, kinderfeestjes, disco-ponyrijden en wat draag je op een pony?</small></span></button>
+      </div>
+      <h3 class="kopje">🎓 Leren &amp; spelen</h3>
+      <div class="modi twee">
+        <button class="modus klein" data-modus="waar"><span class="emoji">✅</span><span><b>Klopt het?</b><small>Waar of niet waar?</small></span></button>
+        <button class="modus klein" data-modus="hussel"><span class="emoji">🔤</span><span><b>Hussel de naam</b><small>Zet de letters goed</small></span></button>
+        <button class="modus klein" data-modus="ruiter"><span class="emoji">🎒</span><span><b>Maak de ruiter klaar</b><small>Wat trek je aan?</small></span></button>
+        <button class="modus klein" data-modus="puzzel"><span class="emoji">🧩</span><span><b>Pony-puzzel</b><small>Leg de foto en raad wie het is</small></span></button>
       </div>
       <h3 class="kopje">🎮 Spelletjes</h3>
       <div class="modi twee">
@@ -88,6 +95,65 @@
       <p id="memMelding" class="memmelding"></p>
     </section>
 
+    <!-- HUSSEL -->
+    <section id="hussel" class="scherm">
+      <div class="voortgang">
+        <span id="husselNr">1/5</span>
+        <div class="balk"><i id="husselBalk"></i></div>
+        <span class="punten">⭐ <b id="husselPunten">0</b></span>
+      </div>
+      <h2 class="midden">🔤 Hoe heet deze pony?</h2>
+      <div class="vraagfoto klein"><img id="husselFoto" alt="Welke pony is dit?"></div>
+      <div id="husselVakken" class="vakken"></div>
+      <div id="husselTegels" class="tegels"></div>
+      <div class="knoppen" id="husselKnoppen">
+        <button class="knop zacht" id="husselHint">💡 Hint</button>
+        <button class="knop zacht" id="husselOpgeven">🤷 Ik weet het niet</button>
+      </div>
+      <div id="husselUitleg" class="uitleg" hidden>
+        <p id="husselOordeel" class="oordeel"></p>
+        <p id="husselTekst"></p>
+        <div class="knoppen"><button class="knop" id="husselVolgende">Volgende ▶</button></div>
+      </div>
+    </section>
+
+    <!-- RUITER -->
+    <section id="ruiter" class="scherm">
+      <div class="voortgang">
+        <span id="ruiterNr">Ronde 1/3</span>
+        <div class="balk"><i id="ruiterBalk"></i></div>
+        <span class="punten">⭐ <b id="ruiterPunten">0</b></span>
+      </div>
+      <h2 class="midden">🎒 Je gaat paardrijden!</h2>
+      <p class="sub midden">Tik op alles wat je aantrekt of goed doet. Laat de rest liggen.<br>In je tas: <b id="ruiterTas">0</b></p>
+      <div id="ruiterItems" class="items"></div>
+      <div class="knoppen" style="margin-top:14px">
+        <button class="knop" id="ruiterCheck">Klaar! Controleer ✔️</button>
+        <button class="knop" id="ruiterVolgende" hidden>Volgende ronde ▶</button>
+      </div>
+      <div id="ruiterUitleg" class="ruiter-uitleg"></div>
+    </section>
+
+    <!-- PUZZEL -->
+    <section id="puzzel" class="scherm">
+      <div class="voortgang">
+        <span>🧩 Puzzel</span>
+        <div class="balk" style="visibility:hidden"></div>
+        <span>🔁 <b id="puzzelZetten">0</b> zetten</span>
+      </div>
+      <p class="sub midden" style="margin-top:10px">Tik op twee stukjes om ze te wisselen. Groen = op de goede plek!</p>
+      <div id="puzzelBord" class="puzzelbord"></div>
+      <div id="puzzelVraag" class="uitleg" hidden>
+        <p class="oordeel goed">Puzzel klaar! 🎉 Wie is dit?</p>
+        <div id="puzzelKeuzes" class="keuzes drie"></div>
+        <div id="puzzelUitleg" hidden>
+          <p id="puzzelOordeel" class="oordeel"></p>
+          <p id="puzzelTekst"></p>
+          <div class="knoppen"><button class="knop" id="puzzelVolgende">Uitslag 🏁</button></div>
+        </div>
+      </div>
+    </section>
+
     <!-- EINDE -->
     <section id="einde" class="scherm">
       <div class="eindkaart">
@@ -124,7 +190,7 @@
   <div id="confetti" aria-hidden="true"></div>
 
   <script src="data.js?v=1"></script>
-  <script src="vragen.js?v=1"></script>
-  <script src="app.js?v=3"></script>
+  <script src="vragen.js?v=2"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

@@ -82,3 +82,21 @@ const PONY_VRAGEN = [
   { v: "Wie gaat graag mee voorop op een buitenrit?", a: "Slechtweervandaag", niet: ["Annemarie", "Cupido Z"] },
   { v: "Wie wil haar grenzen nog wel eens opzoeken?", a: "Peanut" },
 ];
+
+// "Maak de ruiter klaar": uitrusting. Uitleg uit "Wat heb ik nodig bij paardrijden?" en de kinderfeestje-pagina.
+const UITRUSTING = [
+  { e: "⛑️", naam: "Cap met CE-EN 1384 keurmerk", goed: true, uitleg: "De cap is verplicht als je gaat paardrijden, hoe ervaren je ook bent. Je paard kan immers schrikken, uitglijden of gaan rennen." },
+  { e: "👖", naam: "Elastische rijbroek", goed: true, uitleg: "Een rijbroek hoort elastisch te zijn, zodat hij goed meebeweegt tijdens het rijden en geen schaafplekken op je benen geeft." },
+  { e: "👢", naam: "Rijlaarzen", goed: true, uitleg: "Je kuit wordt beschermd tegen schuren en door de hak en de zool blijft je voet mooi op zijn plek in de stijgbeugels." },
+  { e: "🥾", naam: "Stevige schoenen met chaps", goed: true, uitleg: "Je kunt ook stevige hoge schoenen kopen met chaps erbij: leren of suède stukken om je kuit. Die beschermen je kuiten net als rijlaarzen." },
+  { e: "🧤", naam: "Handschoenen", goed: true, uitleg: "Niet verplicht, maar wel prettig: als de teugels nat worden door regen of zweet, geven handschoenen extra grip." },
+  { e: "🎀", naam: "Haar in een lage staart", goed: true, uitleg: "Lang haar is onhandig tijdens het paardrijden. Bind het vast in een lage staart, of gebruik een speciaal haarnetje." },
+  { e: "🧶", naam: "Aansluitende trui", goed: true, uitleg: "Rijkleding heeft een aansluitende pasvorm, zodat je minder snel ergens achter blijft haken. En de instructeur kan je houding beter zien." },
+  { e: "🧥", naam: "Hoodie met capuchon", goed: false, uitleg: "Een capuchon/hoodie is niet veilig: hiermee kun je bij een val ergens achter blijven haken." },
+  { e: "🧣", naam: "Lange loshangende sjaal", goed: false, uitleg: "Loshangende sjaals zijn gevaarlijk, omdat je daarmee kunt blijven haken." },
+  { e: "📿", naam: "Lange ketting", goed: false, uitleg: "Lange sieraden zijn gevaarlijk, omdat je daarmee kunt blijven haken." },
+  { e: "🩴", naam: "Slippers", goed: false, uitleg: "In de manege en op het manegeterrein zijn gesloten schoenen verplicht." },
+  { e: "🌬️", naam: "Je jas open laten", goed: false, uitleg: "Rijd nooit met je jas of vest open: je kunt ergens achter blijven haken." },
+  { e: "💁", naam: "Hoge paardenstaart", goed: false, uitleg: "Een hoge staart kan knel komen te zitten tussen je hoofd en de cap, en dat zit niet lekker." },
+  { e: "👖", naam: "Spijkerbroek met dikke naden", goed: false, uitleg: "Pas op met dikke naden aan de binnenkant zoals bij spijkerbroeken: die kunnen gaan schuren." },
+];

@@ -14,7 +14,9 @@ const bewaar = () => localStorage.setItem(OPSLAG, JSON.stringify(staat));
 const MODI = {
   foto: "📸 Wie is dit?", weetje: "🔎 Wie ben ik?", trivia: "🧠 Pony-trivia", manege: "🏇 Manege-weetjes",
   mix: "🎲 Grote mix", snel: "⏱️ Snelle ronde", memory: "🃏 Memory",
+  waar: "✅ Klopt het?", hussel: "🔤 Hussel de naam", ruiter: "🎒 Maak de ruiter klaar", puzzel: "🧩 Pony-puzzel",
 };
+const LAAG_IS_BETER = ["memory", "puzzel"];
 const PONY = Object.fromEntries(PONYS.map((p) => [p.naam, p]));
 
 let spel = null;
@@ -33,9 +35,8 @@ function toon(id) {
 function telling() {
   $("#verzameld").textContent = PONYS.filter((p) => staat.heb[p.naam]).length;
   $("#totaal").textContent = PONYS.length;
-  const r = Object.entries(staat.records).filter(([m]) => MODI[m] && m !== "memory");
-  const delen = r.map(([m, v]) => `${MODI[m].split(" ")[0]} ${v}`);
-  if (staat.records.memory) delen.push(`🃏 ${staat.records.memory} beurten`);
+  const delen = Object.entries(staat.records).filter(([m]) => MODI[m])
+    .map(([m, v]) => `${MODI[m].split(" ")[0]} ${v}${LAAG_IS_BETER.includes(m) ? " zetten" : ""}`);
   $("#record").textContent = delen.length ? "🏆 Records: " + delen.join(" · ") : "";
 }
 
@@ -99,22 +100,46 @@ const MAKERS = {
       uitleg: { emoji: q.e, naam: `Antwoord: ${q.goed}`, tekst: q.uitleg, bron: `Bron: manegehooidonk.nl – ${q.bron}` },
     };
   },
+  waar(q) {
+    q = q || kies(STELLINGEN());
+    const klopt = Math.random() < .5;
+    let html, foto, uitleg;
+    if (q.a) {
+      const p = PONY[q.a];
+      const ander = klopt ? p : kies(andere(p, 3, q.niet || []));
+      foto = kies(ander.fotos);
+      html = `<b>${esc(ander.naam)}</b> ${esc(q.v.replace(/^Wie /, "").replace(/\?$/, "."))}`;
+      uitleg = { foto: kies(p.fotos), naam: klopt ? `Ja! Dat is ${p.naam}.` : `Nee, dat is ${p.naam}!`, tekst: (q.hint ? q.hint + " " : "") + p.tekst };
+      return { titel: "✅ Klopt het?", foto, html, pony: p, opties: [{ key: "ja", label: "👍 Klopt" }, { key: "nee", label: "👎 Klopt niet" }], juist: klopt ? "ja" : "nee", uitleg, tweeKeuzes: true };
+    }
+    const antw = klopt ? q.goed : kies(q.fout);
+    html = `${esc(q.v)}<br><span class="stelling">👉 ${esc(antw)}</span>`;
+    uitleg = { emoji: q.e, naam: klopt ? `Ja! ${q.goed}` : `Nee, het is: ${q.goed}`, tekst: q.uitleg, bron: `Bron: manegehooidonk.nl – ${q.bron}` };
+    return { titel: "✅ Klopt het?", html, opties: [{ key: "ja", label: "👍 Klopt" }, { key: "nee", label: "👎 Klopt niet" }], juist: klopt ? "ja" : "nee", uitleg, tweeKeuzes: true };
+  },
 };
 
+// stellingen voor "Klopt het?": pony-vragen die met "Wie" beginnen + manege-vragen
+const STELLINGEN = () => [...PONY_VRAGEN.filter((q) => q.v.startsWith("Wie ")), ...MANEGE_VRAGEN];
+
 function rondeVragen(modus) {
+  if (modus === "waar") return schud(STELLINGEN()).slice(0, RONDES).map((q) => () => MAKERS.waar(q));
   if (modus === "foto" || modus === "weetje") return schud(PONYS).slice(0, RONDES).map((p) => () => MAKERS[modus](p));
   if (modus === "trivia") return schud(PONY_VRAGEN).slice(0, RONDES).map((q) => () => MAKERS.trivia(q));
   if (modus === "manege") return schud(MANEGE_VRAGEN).slice(0, RONDES).map((q) => () => MAKERS.manege(q));
   // mix: van elke soort wat, zonder dubbele vragen
-  const soorten = schud(["foto", "foto", "foto", "weetje", "weetje", "trivia", "trivia", "manege", "manege", "manege"]);
+  const soorten = schud(["foto", "foto", "foto", "weetje", "weetje", "trivia", "trivia", "manege", "manege", "waar"]);
   const ponys = schud(PONYS), trivia = schud(PONY_VRAGEN), manege = schud(MANEGE_VRAGEN);
-  return soorten.map((s) => () => MAKERS[s](s === "trivia" ? trivia.pop() : s === "manege" ? manege.pop() : ponys.pop()));
+  return soorten.map((s) => () => MAKERS[s](s === "trivia" ? trivia.pop() : s === "manege" ? manege.pop() : s === "waar" ? null : ponys.pop()));
 }
 
 // ---------- quiz ----------
 function start(modus) {
   clearInterval(klok);
   if (modus === "memory") return memory();
+  if (modus === "hussel") return hussel();
+  if (modus === "ruiter") return ruiter();
+  if (modus === "puzzel") return puzzel();
   spel = { modus, nr: 0, punten: 0, reeks: 0, goed: 0, nieuw: [], snel: modus === "snel" };
   spel.rij = spel.snel ? [] : rondeVragen(modus);
   $("#reeks").hidden = true;
@@ -156,7 +181,7 @@ function vraag() {
 
   const keuzes = $("#keuzes");
   keuzes.innerHTML = "";
-  keuzes.className = "keuzes" + (v.fotoKeuzes ? " fotos" : "") + (v.opties.some((o) => o.label.length > 22) ? " breed" : "");
+  keuzes.className = "keuzes" + (v.fotoKeuzes ? " fotos" : "") + (v.tweeKeuzes ? " twee" : "") + (v.opties.some((o) => o.label.length > 22) ? " breed" : "");
   v.opties.forEach((o) => {
     const b = document.createElement("button");
     b.className = "keuze";
@@ -221,7 +246,12 @@ function volgende() {
 function einde() {
   const { goed, punten, nieuw, modus } = spel;
   let sterren, tekst;
-  if (modus === "memory") {
+  if (spel.uitslag) {
+    ({ sterren, tekst } = spel.uitslag);
+    const oud = staat.records[modus], score = spel.uitslag.score;
+    const beter = LAAG_IS_BETER.includes(modus) ? !oud || score < oud : score > (oud || 0);
+    if (beter) { if (oud) tekst += " 🏆 Nieuw record!"; staat.records[modus] = score; bewaar(); }
+  } else if (modus === "memory") {
     sterren = spel.zetten <= 9 ? 3 : spel.zetten <= 13 ? 2 : 1;
     tekst = `Je vond alle ${MEMORY_PAREN} paren in ${spel.zetten} beurten.`;
     const oud = staat.records.memory;
@@ -289,6 +319,266 @@ function draai(b, k) {
   }
 }
 
+// ---------- nieuwe spellen ----------
+// 🔤 Hussel de naam
+const HUSSEL_AANTAL = 5;
+function hussel() {
+  const kandidaten = PONYS.filter((p) => p.naam !== "Shetlanders" && p.naam.replace(/[^A-Za-zÀ-ÿ]/g, "").length <= 12);
+  spel = { modus: "hussel", nr: 0, punten: 0, goed: 0, nieuw: [], rij: schud(kandidaten).slice(0, HUSSEL_AANTAL) };
+  toon("hussel");
+  husselVraag();
+}
+
+function husselVraag() {
+  const p = spel.rij[spel.nr];
+  const tekens = [...p.naam.toUpperCase()];
+  const letters = tekens.map((t, i) => ({ t, i })).filter((x) => /[A-ZÀ-ÿ]/i.test(x.t) && x.t !== " ");
+  let volgorde;
+  do { volgorde = schud(letters); } while (letters.length > 1 && volgorde.every((x, i) => x === letters[i]));
+  Object.assign(spel, { p, tekens, letters, tegels: volgorde.map((x, k) => ({ t: x.t, k })), vak: {}, hints: 0, klaar: false });
+  $("#husselNr").textContent = `${spel.nr + 1}/${HUSSEL_AANTAL}`;
+  $("#husselBalk").style.width = `${(spel.nr / HUSSEL_AANTAL) * 100}%`;
+  $("#husselPunten").textContent = spel.punten;
+  $("#husselFoto").src = kies(p.fotos);
+  $("#husselUitleg").hidden = true;
+  $("#husselKnoppen").hidden = false;
+  husselTeken();
+}
+
+function husselTeken() {
+  const { tekens, vak, tegels } = spel;
+  const vakken = $("#husselVakken");
+  vakken.innerHTML = "";
+  tekens.forEach((t, i) => {
+    const el = document.createElement("button");
+    if (!/[A-ZÀ-ÿ]/i.test(t) || t === " ") { el.className = "vakje vast"; el.textContent = t === " " ? "" : t; el.disabled = true; }
+    else {
+      el.className = "vakje" + (vak[i] ? " vol" : "");
+      el.textContent = vak[i] ? vak[i].t : "";
+      el.onclick = () => { if (!spel.klaar && vak[i]) { delete vak[i]; husselTeken(); } };
+    }
+    vakken.append(el);
+  });
+  const gebruikt = new Set(Object.values(vak).map((x) => x.k));
+  const bak = $("#husselTegels");
+  bak.innerHTML = "";
+  tegels.forEach((x) => {
+    const b = document.createElement("button");
+    b.className = "tegel-letter";
+    b.textContent = x.t;
+    b.disabled = gebruikt.has(x.k) || spel.klaar;
+    b.onclick = () => { const leeg = spel.letters.find((l) => !vak[l.i]); if (leeg) { vak[leeg.i] = x; husselTeken(); husselCheck(); } };
+    bak.append(b);
+  });
+}
+
+function husselCheck() {
+  const { letters, vak } = spel;
+  if (letters.some((l) => !vak[l.i])) return;
+  if (letters.every((l) => vak[l.i].t === l.t)) return husselKlaar(true);
+  const vakken = $("#husselVakken");
+  vakken.classList.add("fout");
+  setTimeout(() => {
+    vakken.classList.remove("fout");
+    letters.forEach((l) => { if (vak[l.i].t !== l.t) delete vak[l.i]; });
+    husselTeken();
+  }, 700);
+}
+
+function husselHint() {
+  const { letters, vak, tegels } = spel;
+  letters.forEach((l) => { if (vak[l.i] && vak[l.i].t !== l.t) delete vak[l.i]; });
+  const l = letters.find((x) => !vak[x.i]);
+  if (!l) return;
+  const gebruikt = new Set(Object.values(vak).map((x) => x.k));
+  vak[l.i] = tegels.find((x) => x.t === l.t && !gebruikt.has(x.k));
+  spel.hints++;
+  husselTeken();
+  husselCheck();
+}
+
+function husselKlaar(goed, opgegeven) {
+  spel.klaar = true;
+  const p = spel.p;
+  if (opgegeven) spel.letters.forEach((l) => { spel.vak[l.i] = { t: l.t, k: -1 }; });
+  husselTeken();
+  $("#husselVakken").classList.add(goed ? "goed" : "opgegeven");
+  let erbij = 0;
+  if (goed) { erbij = Math.max(5, 20 - spel.hints * 5); spel.punten += erbij; spel.goed++; verzamel(p); if (!spel.hints) confetti(25); }
+  $("#husselPunten").textContent = spel.punten;
+  $("#husselOordeel").textContent = goed ? (spel.hints ? `Goed zo! +${erbij} 🎉` : `Helemaal zelf! +${erbij} ⭐`) : `Het was ${p.naam}!`;
+  $("#husselOordeel").className = `oordeel ${goed ? "goed" : "fout"}`;
+  $("#husselTekst").textContent = p.tekst;
+  $("#husselVolgende").textContent = spel.nr + 1 < HUSSEL_AANTAL ? "Volgende ▶" : "Uitslag 🏁";
+  $("#husselKnoppen").hidden = true;
+  $("#husselUitleg").hidden = false;
+  setTimeout(() => $("#husselUitleg").scrollIntoView({ behavior: "smooth", block: "nearest" }), 150);
+}
+
+function husselVolgende() {
+  spel.nr++;
+  if (spel.nr < HUSSEL_AANTAL) { husselVraag(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+  const max = HUSSEL_AANTAL * 20;
+  spel.uitslag = {
+    score: spel.punten,
+    sterren: spel.punten >= max * .85 ? 3 : spel.punten >= max * .6 ? 2 : spel.punten >= max * .3 ? 1 : 0,
+    tekst: `Je spelde ${spel.goed} van de ${HUSSEL_AANTAL} namen goed en scoorde ${spel.punten} punten.`,
+  };
+  einde();
+}
+
+// 🎒 Maak de ruiter klaar
+const RUITER_RONDES = 3;
+function ruiter() {
+  spel = { modus: "ruiter", nr: 0, punten: 0, nieuw: [], goedLijst: schud(UITRUSTING.filter((x) => x.goed)), foutLijst: schud(UITRUSTING.filter((x) => !x.goed)) };
+  toon("ruiter");
+  ruiterRonde();
+}
+
+function ruiterRonde() {
+  const pak = (lijst, goed) => {
+    if (lijst.length < 3) lijst.push(...schud(UITRUSTING.filter((x) => x.goed === goed && !lijst.includes(x))));
+    return lijst.splice(0, 3);
+  };
+  spel.items = schud([...pak(spel.goedLijst, true), ...pak(spel.foutLijst, false)]);
+  spel.gekozen = new Set();
+  spel.gecheckt = false;
+  $("#ruiterNr").textContent = `Ronde ${spel.nr + 1}/${RUITER_RONDES}`;
+  $("#ruiterBalk").style.width = `${(spel.nr / RUITER_RONDES) * 100}%`;
+  $("#ruiterPunten").textContent = spel.punten;
+  $("#ruiterUitleg").innerHTML = "";
+  $("#ruiterCheck").hidden = false;
+  $("#ruiterVolgende").hidden = true;
+  ruiterTeken();
+}
+
+function ruiterTeken() {
+  const bord = $("#ruiterItems");
+  bord.innerHTML = "";
+  spel.items.forEach((it, i) => {
+    const b = document.createElement("button");
+    const in_ = spel.gekozen.has(i);
+    let cls = "item" + (in_ ? " in" : "");
+    if (spel.gecheckt) cls += in_ === it.goed ? " juist" : " onjuist";
+    b.className = cls;
+    b.innerHTML = `<span class="item-emoji">${it.e}</span><span>${esc(it.naam)}</span>${in_ ? '<i class="vink">🎒</i>' : ""}`;
+    b.disabled = spel.gecheckt;
+    b.onclick = () => { in_ ? spel.gekozen.delete(i) : spel.gekozen.add(i); ruiterTeken(); };
+    bord.append(b);
+  });
+  $("#ruiterTas").textContent = spel.gekozen.size;
+}
+
+function ruiterCheck() {
+  spel.gecheckt = true;
+  let juist = 0;
+  spel.items.forEach((it, i) => { if (spel.gekozen.has(i) === it.goed) juist++; });
+  spel.punten += juist * 5;
+  $("#ruiterPunten").textContent = spel.punten;
+  ruiterTeken();
+  const goedGedaan = juist === spel.items.length;
+  if (goedGedaan) confetti(40);
+  $("#ruiterUitleg").innerHTML = `<p class="oordeel ${goedGedaan ? "goed" : juist >= 4 ? "goed" : "fout"}">${goedGedaan ? "Perfect! Klaar om te rijden! 🏇" : `${juist} van de ${spel.items.length} goed gekozen`}</p>` +
+    spel.items.map((it) => `<div class="uitleg-regel ${it.goed ? "ja" : "nee"}"><b>${it.e} ${esc(it.naam)}: ${it.goed ? "✅ wel doen" : "❌ niet doen"}</b><br>${esc(it.uitleg)}</div>`).join("") +
+    `<p class="bron">Bron: manegehooidonk.nl – Wat heb ik nodig bij paardrijden?</p>`;
+  $("#ruiterCheck").hidden = true;
+  $("#ruiterVolgende").hidden = false;
+  $("#ruiterVolgende").textContent = spel.nr + 1 < RUITER_RONDES ? "Volgende ronde ▶" : "Uitslag 🏁";
+  setTimeout(() => $("#ruiterUitleg").scrollIntoView({ behavior: "smooth", block: "start" }), 200);
+}
+
+function ruiterVolgende() {
+  spel.nr++;
+  if (spel.nr < RUITER_RONDES) { ruiterRonde(); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+  const max = RUITER_RONDES * 30;
+  spel.uitslag = {
+    score: spel.punten,
+    sterren: spel.punten >= max * .9 ? 3 : spel.punten >= max * .7 ? 2 : spel.punten >= max * .45 ? 1 : 0,
+    tekst: `Je scoorde ${spel.punten} van de ${max} punten. Zo weet je precies wat je aantrekt om te gaan rijden!`,
+  };
+  einde();
+}
+
+// 🧩 Pony-puzzel
+function puzzel() {
+  const p = kies(PONYS);
+  const foto = kies(p.fotos);
+  let stukken;
+  do { stukken = schud([...Array(9).keys()]); } while (stukken.every((s, i) => s === i));
+  spel = { modus: "puzzel", p, foto, stukken, gekozen: null, zetten: 0, nieuw: [], klaar: false };
+  $("#puzzelZetten").textContent = 0;
+  $("#puzzelVraag").hidden = true;
+  $("#puzzelUitleg").hidden = true;
+  $("#puzzelBord").classList.remove("af");
+  toon("puzzel");
+  puzzelTeken();
+}
+
+function puzzelTeken() {
+  const bord = $("#puzzelBord");
+  bord.innerHTML = "";
+  spel.stukken.forEach((s, plek) => {
+    const b = document.createElement("button");
+    b.className = "stuk" + (spel.gekozen === plek ? " gekozen" : "") + (s === plek ? " op-plek" : "");
+    b.innerHTML = `<img src="${spel.foto}" alt="" style="left:${-(s % 3) * 100}%;top:${-Math.floor(s / 3) * 100}%">`;
+    b.disabled = spel.klaar;
+    b.onclick = () => puzzelTik(plek);
+    bord.append(b);
+  });
+}
+
+function puzzelTik(plek) {
+  if (spel.gekozen === null) { spel.gekozen = plek; return puzzelTeken(); }
+  if (spel.gekozen !== plek) {
+    const st = spel.stukken;
+    [st[spel.gekozen], st[plek]] = [st[plek], st[spel.gekozen]];
+    spel.zetten++;
+    $("#puzzelZetten").textContent = spel.zetten;
+  }
+  spel.gekozen = null;
+  if (spel.stukken.every((s, i) => s === i)) { spel.klaar = true; $("#puzzelBord").classList.add("af"); }
+  puzzelTeken();
+  if (spel.klaar) setTimeout(puzzelVraag, 700);
+}
+
+function puzzelVraag() {
+  const p = spel.p;
+  const opties = schud([p, ...andere(p, 2)]);
+  const k = $("#puzzelKeuzes");
+  k.innerHTML = "";
+  opties.forEach((o) => {
+    const b = document.createElement("button");
+    b.className = "keuze";
+    b.textContent = o.naam;
+    b.dataset.key = o.naam;
+    b.onclick = () => {
+      const goed = o === p;
+      k.querySelectorAll(".keuze").forEach((x) => { x.disabled = true; if (x.dataset.key === p.naam) x.classList.add("goed"); });
+      if (!goed) b.classList.add("fout");
+      else verzamel(p);
+      spel.naamGoed = goed;
+      $("#puzzelOordeel").textContent = goed ? "Goed geraden! 🎉" : `Oeps! Dit is ${p.naam}`;
+      $("#puzzelOordeel").className = `oordeel ${goed ? "goed" : "fout"}`;
+      $("#puzzelTekst").textContent = p.tekst;
+      $("#puzzelUitleg").hidden = false;
+      setTimeout(() => $("#puzzelUitleg").scrollIntoView({ behavior: "smooth", block: "start" }), 150);
+    };
+    k.append(b);
+  });
+  $("#puzzelVraag").hidden = false;
+  $("#puzzelVraag").scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function puzzelKlaar() {
+  let sterren = spel.zetten <= 10 ? 3 : spel.zetten <= 16 ? 2 : 1;
+  if (!spel.naamGoed) sterren = Math.max(0, sterren - 1);
+  spel.uitslag = {
+    score: spel.zetten, sterren,
+    tekst: `Je legde de puzzel van ${spel.p.naam} in ${spel.zetten} zetten${spel.naamGoed ? " en raadde de naam goed!" : "."}`,
+  };
+  einde();
+}
+
 // ---------- stal ----------
 function stal() {
   const lijst = $("#stalLijst");
@@ -328,6 +618,12 @@ function confetti(n) {
 const naarHome = () => { clearInterval(klok); telling(); toon("home"); };
 document.querySelectorAll(".modus").forEach((b) => (b.onclick = () => (b.dataset.modus === "stal" ? stal() : start(b.dataset.modus))));
 $("#volgende").onclick = volgende;
+$("#husselHint").onclick = husselHint;
+$("#husselOpgeven").onclick = () => husselKlaar(false, true);
+$("#husselVolgende").onclick = husselVolgende;
+$("#ruiterCheck").onclick = ruiterCheck;
+$("#ruiterVolgende").onclick = ruiterVolgende;
+$("#puzzelVolgende").onclick = puzzelKlaar;
 $("#opnieuw").onclick = () => start(spel.modus);
 $("#eindHome").onclick = naarHome;
 $("#naarHome").onclick = naarHome;
