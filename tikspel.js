@@ -51,6 +51,7 @@ function ponyFoto(p) {
 function tikspelStart() {
   tikStop();
   spel = { modus: "tikspel", nieuw: [] };
+  $("#tikGetikt").hidden = true;
   $("#tikStart").hidden = false;
   $("#tikPonyKeuze").hidden = true;
   $("#tikSpeelveld").hidden = true;

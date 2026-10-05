@@ -27,9 +27,14 @@ const kies = (a) => a[Math.floor(Math.random() * a.length)];
 const zonderAccent = (t) => t.normalize("NFD").replace(/[̀-ͯ]/g, "");
 const esc = (t) => t.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+// Terug-navigatie: buiten het menu staat er een stap in de browsergeschiedenis,
+// zodat de terugknop van de telefoon naar het menu gaat i.p.v. de app te verlaten.
+let inSpel = false;
 function toon(id) {
   document.querySelectorAll(".scherm").forEach((s) => s.classList.toggle("actief", s.id === id));
   window.scrollTo(0, 0);
+  $("#terug").hidden = id === "home";
+  if (id !== "home" && !inSpel) { history.pushState({ spel: 1 }, ""); inSpel = true; }
 }
 
 function telling() {
@@ -616,7 +621,21 @@ function confetti(n) {
   }
 }
 
-const naarHome = () => { clearInterval(klok); tikStop(); telling(); toon("home"); };
+function stopAlles() { clearInterval(klok); tikStop(); $("#kaart").hidden = true; }
+function naarHome() {
+  stopAlles();
+  telling();
+  toon("home");
+  if (inSpel) { inSpel = false; history.back(); }
+}
+window.addEventListener("popstate", () => {
+  if (!inSpel) return;
+  if (!$("#kaart").hidden) { $("#kaart").hidden = true; history.pushState({ spel: 1 }, ""); return; }
+  inSpel = false;
+  stopAlles();
+  telling();
+  toon("home");
+});
 document.querySelectorAll(".modus").forEach((b) => (b.onclick = () => (b.dataset.modus === "stal" ? stal() : start(b.dataset.modus))));
 $("#volgende").onclick = volgende;
 $("#husselHint").onclick = husselHint;
@@ -628,6 +647,7 @@ $("#puzzelVolgende").onclick = puzzelKlaar;
 $("#opnieuw").onclick = () => start(spel.modus);
 $("#eindHome").onclick = naarHome;
 $("#naarHome").onclick = naarHome;
+$("#terug").onclick = naarHome;
 $("#kaartSluit").onclick = () => ($("#kaart").hidden = true);
 $("#kaart").onclick = (e) => { if (e.target.id === "kaart") $("#kaart").hidden = true; };
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("#kaart").hidden = true; });
