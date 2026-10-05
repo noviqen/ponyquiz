@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Pony Quiz – Manege Hooidonk</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://www.manegehooidonk.nl; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#a3123f">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐴</text></svg>">
+  <link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+  <header>
+    <button class="logo" id="naarHome" aria-label="Naar start">🐴 <span>Pony<b>Quiz</b></span></button>
+    <div class="scorebalk">
+      <span title="Pony's verzameld">🏅 <b id="verzameld">0</b>/<b id="totaal">0</b></span>
+    </div>
+  </header>
+
+  <main>
+    <!-- START -->
+    <section id="home" class="scherm actief">
+      <div class="hero">
+        <h1>Ken jij de pony's van<br><span>Manege Hooidonk?</span></h1>
+        <p>Raad de namen, verzamel alle pony's en ontdek de leukste weetjes!</p>
+      </div>
+      <div class="modi">
+        <button class="modus" data-modus="foto">
+          <span class="emoji">📸</span>
+          <span><b>Wie is dit?</b><small>Je ziet een foto. Welke naam hoort erbij?</small></span>
+        </button>
+        <button class="modus" data-modus="weetje">
+          <span class="emoji">🔎</span>
+          <span><b>Wie ben ik?</b><small>Lees het weetje. Welke pony is het?</small></span>
+        </button>
+        <button class="modus" data-modus="stal">
+          <span class="emoji">🏠</span>
+          <span><b>De stal</b><small>Bekijk alle pony's en lees hun verhaal</small></span>
+        </button>
+      </div>
+      <p class="record" id="record"></p>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="scherm">
+      <div class="voortgang">
+        <span id="vraagNr">1/10</span>
+        <div class="balk"><i id="balk"></i></div>
+        <span class="punten">⭐ <b id="punten">0</b></span>
+        <span class="reeks" id="reeks" hidden>🔥 <b></b></span>
+      </div>
+      <h2 id="vraag"></h2>
+      <div id="vraagFoto" class="vraagfoto"><img alt="Welke pony is dit?"></div>
+      <p id="vraagTekst" class="vraagtekst"></p>
+      <div id="keuzes" class="keuzes"></div>
+
+      <div id="uitleg" class="uitleg" hidden>
+        <div class="uitleg-kop">
+          <img id="uitlegFoto" alt="">
+          <div>
+            <p id="uitlegOordeel" class="oordeel"></p>
+            <p class="uitleg-naam" id="uitlegNaam"></p>
+          </div>
+        </div>
+        <p id="uitlegTekst"></p>
+        <div class="knoppen">
+          <button id="volgende" class="knop">Volgende ▶</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- EINDE -->
+    <section id="einde" class="scherm">
+      <div class="eindkaart">
+        <div class="sterren" id="sterren"></div>
+        <h2 id="eindTitel"></h2>
+        <p id="eindTekst"></p>
+        <div class="nieuw" id="nieuw"></div>
+        <div class="knoppen">
+          <button class="knop" id="opnieuw">Nog een keer 🔁</button>
+          <button class="knop zacht" id="eindHome">Naar start</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- STAL -->
+    <section id="stal" class="scherm">
+      <h2>🏠 De stal</h2>
+      <p class="sub">Pony's die je goed geraden hebt krijgen een 🏅. Tik op een pony voor het hele verhaal.</p>
+      <div id="stalLijst" class="stal"></div>
+    </section>
+
+    <!-- PONYKAART -->
+    <div id="kaart" class="kaart-achter" hidden>
+      <div class="kaart" role="dialog" aria-modal="true">
+        <button class="sluit" id="kaartSluit" aria-label="Sluiten">✕</button>
+        <div class="kaart-fotos" id="kaartFotos"></div>
+        <h2 id="kaartNaam"></h2>
+        <p id="kaartTekst"></p>
+      </div>
+    </div>
+  </main>
+
+  <footer>Foto's en teksten: <a href="https://www.manegehooidonk.nl/manege/fotos-ponys/" target="_blank" rel="noopener">manegehooidonk.nl</a></footer>
+  <div id="confetti" aria-hidden="true"></div>
+
+  <script src="data.js?v=1"></script>
+  <script src="app.js?v=2"></script>
+</body>
+</html>
