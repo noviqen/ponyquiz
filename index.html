@@ -9,7 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#a3123f">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐴</text></svg>">
-  <link rel="stylesheet" href="style.css?v=4">
+  <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body>
   <header>
@@ -165,7 +165,7 @@
           <p>😋 Boven is <b>Lekker land</b>, 🤢 onder is <b>Vies land</b>.</p>
           <p>👧 In het midden rijdt de <b>tikker</b>: een meisje op een pony. Zij roept iets, bijvoorbeeld <b>"Spruitjes!"</b></p>
           <p>Vind je het lekker? Ren naar Lekker land. Vies? Dan naar Vies land. Pas op dat je niet getikt wordt!</p>
-          <p>👆 <b>Sleep je pony met je vinger.</b> Hij volgt je rustig, dus denk vooruit! Laat je los, dan rijdt hij vanzelf door.</p>
+          <p>👆 <b>Sleep je pony met je vinger.</b> Hij volgt je rustig, dus denk vooruit! Laat je los, dan rijdt hij vanzelf door. Met de 🐢-🐇-schuif onder de bak kies je hoe snel alles gaat.</p>
           <p>Getikt? Dan ga je naar het midden en tik je mee. Wie het langst overblijft, wint! 🏆</p>
         </div>
         <p class="midden"><b>Wie wil jij zijn?</b></p>
@@ -189,6 +189,10 @@
         </div>
         <div id="tikRoep" class="tikroep"></div>
         <div class="tikveld-houder"><canvas id="tikVeld"></canvas></div>
+        <label class="tempo">
+          <span>Snelheid: <b id="tikTempoNaam">🐢 Stap</b></span>
+          <span class="tempo-rij">🐢<input type="range" id="tikTempo" min="0" max="4" step="1" value="0" aria-label="Snelheid">🐇</span>
+        </label>
         <p id="tikHint" class="tikhint"></p>
         <div id="tikKnoppen" class="tikknoppen"></div>
       </div>
@@ -244,6 +248,6 @@
   <script src="data.js?v=1"></script>
   <script src="vragen.js?v=2"></script>
   <script src="app.js?v=5"></script>
-  <script src="tikspel.js?v=3"></script>
+  <script src="tikspel.js?v=5"></script>
 </body>
 </html>

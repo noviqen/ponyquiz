@@ -131,6 +131,12 @@ function tikRonde() {
       paneel.append(b);
     });
   }
+  tikToonKeuze();
+}
+
+function tikToonKeuze() {
+  // zorg dat de bak én de knoppen in beeld zijn
+  setTimeout(() => $("#tikKnoppen").scrollIntoView({ behavior: "smooth", block: "end" }), 50);
 }
 
 function tikKiesEten() {
@@ -174,6 +180,7 @@ function tikBeslis() {
     mij.doel ? "🏃 Rennen! Sleep je pony om de tikker te ontwijken. Loslaten = rustig doorrijden." : "😌 Jij blijft staan. Kijk maar wie er getikt wordt!";
   tikSpel.vinger = null;
   tikSpel.fase = "ren";
+  $("#tikVeld").scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function tikRondeKlaar() {
@@ -183,6 +190,19 @@ function tikRondeKlaar() {
     if (over.length === 1 && over[0].speler) return tikEinde(true);
   } else if (!over.length || tikSpel.ronde >= TK.MAX_RONDES) return tikEinde(!over.length);
   tikRonde();
+}
+
+// ---------- tempo (schuif) ----------
+const TEMPI = [
+  { n: "🐢 Stap", f: 0.35 }, { n: "🐴 Rustige draf", f: 0.5 }, { n: "🏇 Draf", f: 0.65 },
+  { n: "💨 Galop", f: 0.8 }, { n: "🐇 Volle galop", f: 1 },
+];
+let tikTempo = Math.min(TEMPI.length - 1, Math.max(0, +(localStorage.getItem("ponyquiz-tempo") ?? 0)));
+function tikZetTempo(i) {
+  tikTempo = i;
+  localStorage.setItem("ponyquiz-tempo", i);
+  $("#tikTempo").value = i;
+  $("#tikTempoNaam").textContent = TEMPI[i].n;
 }
 
 // ---------- beweging ----------
@@ -206,7 +226,7 @@ function naarVinger(e, max) {
 }
 function tikLus(nu) {
   if (!tikSpel) return;
-  const dt = Math.min(0.05, (nu - tikSpel.laatst) / 1000);
+  const dt = Math.min(0.05, (nu - tikSpel.laatst) / 1000) * TEMPI[tikTempo].f; // alles gaat even snel mee met de schuif
   tikSpel.laatst = nu;
   if (tikSpel.fase === "ren") tikBeweeg(dt);
   tikTikkersBeweeg(dt);
@@ -484,6 +504,9 @@ function tikPointer(ev) {
   c.addEventListener("pointerup", los);
   c.addEventListener("pointercancel", los);
   window.addEventListener("resize", () => { if (tikSpel) tikMaat(); });
+  $("#tikTempo").max = TEMPI.length - 1;
+  $("#tikTempo").oninput = (ev) => tikZetTempo(+ev.target.value);
+  tikZetTempo(tikTempo);
   $("#tikAlsRuiter").onclick = tikKiesPony;
   $("#tikAlsTikker").onclick = () => tikNieuw("tikker");
   $("#tikWillekeurig").onclick = () => tikNieuw("ruiter", kies(PONYS.filter((p) => p.naam !== "Shetlanders")));
