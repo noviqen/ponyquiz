@@ -77,7 +77,7 @@ function tikNieuw(mode, eigen) {
   const ponys = mode === "ruiter" ? [eigen, ...pool.slice(0, TK.RENNERS - 1)] : pool.slice(0, TK.RENNERS + 1);
   tikSpel = {
     mode, ronde: 0, punten: 0, reeks: 0, tikken: 0, gebruikt: new Set(), fase: "roep", roep: null,
-    pointer: null, berichten: [], laatst: performance.now(), raf: 0,
+    vinger: null, berichten: [], laatst: performance.now(), raf: 0,
     ents: [
       ...ponys.map((p, i) => ({
         p, img: ponyFoto(p), rol: "ruiter", speler: mode === "ruiter" && i === 0, land: "lekker", doel: null, bleef: 0,
@@ -160,7 +160,7 @@ function tikBeslis() {
       if (e.bleef >= 2) kies_ = e.land === "lekker" ? "vies" : "lekker";
     }
     if (kies_ === e.land) { e.bleef++; e.doel = null; }
-    else { e.bleef = 0; e.doel = kies_; e.wacht = e.speler ? 0 : Math.random() * 1.6; lopers++; }
+    else { e.bleef = 0; e.doel = kies_; e.wacht = e.speler ? 0 : Math.random() * 1.6; e.startY = e.y; e.vx = e.vy = 0; lopers++; }
   });
   $("#tikKnoppen").innerHTML = "";
   if (!lopers) {
@@ -170,9 +170,9 @@ function tikBeslis() {
     return;
   }
   const mij = ik();
-  $("#tikHint").textContent = tikSpel.mode === "tikker" ? "👆 Tik of sleep in de bak: daar rijdt jouw tikker heen!" :
-    mij.doel ? "🏃 Rennen! Tik links of rechts in de bak om de tikker te ontwijken!" : "😌 Jij blijft staan. Kijk maar wie er getikt wordt!";
-  tikSpel.pointer = null;
+  $("#tikHint").textContent = tikSpel.mode === "tikker" ? "👆 Sleep met je vinger: jouw tikker volgt je (rustig aan)!" :
+    mij.doel ? "🏃 Rennen! Sleep je pony om de tikker te ontwijken. Loslaten = rustig doorrijden." : "😌 Jij blijft staan. Kijk maar wie er getikt wordt!";
+  tikSpel.vinger = null;
   tikSpel.fase = "ren";
 }
 
@@ -186,6 +186,24 @@ function tikRondeKlaar() {
 }
 
 // ---------- beweging ----------
+const SPELER_V = { ruiter: 0.34, tikker: 0.4, vanzelf: 0.26, soepel: 3.2 }; // max. snelheid en "vertraging" bij slepen
+
+// Laat de eigen pony soepel (met vertraging) naar een doelsnelheid bewegen
+function tikStuur(e, wx, wy, dt) {
+  const k = Math.min(1, dt * SPELER_V.soepel);
+  e.vx = (e.vx || 0) + (wx - (e.vx || 0)) * k;
+  e.vy = (e.vy || 0) + (wy - (e.vy || 0)) * k;
+  e.x += e.vx * dt;
+  e.y += e.vy * dt;
+}
+function naarVinger(e, max) {
+  const v = tikSpel.vinger;
+  if (!v) return null;
+  const dx = v.x - e.x, dy = v.y - e.y, d = Math.hypot(dx, dy);
+  if (d < 0.01) return [0, 0];
+  const snel = Math.min(max, d * 3); // dichtbij je vinger rustig afremmen
+  return [(dx / d) * snel, (dy / d) * snel];
+}
 function tikLus(nu) {
   if (!tikSpel) return;
   const dt = Math.min(0.05, (nu - tikSpel.laatst) / 1000);
@@ -197,18 +215,23 @@ function tikLus(nu) {
 }
 
 function tikBeweeg(dt) {
-  const vY = 0.42;
+  const vY = 0.34;
   const ts = tikkers();
   renners().forEach((e) => {
     if (!e.doel) return;
     if (e.wacht > 0) { e.wacht -= dt; return; }
     const doelY = landY(e.doel);
     const richting = Math.sign(doelY - e.y);
-    e.y += richting * vY * dt;
+    if (e.speler) {
+      // slepen met je vinger; laat je los, dan rijdt je pony rustig vanzelf door
+      const w = naarVinger(e, SPELER_V.ruiter) || [0, richting * SPELER_V.vanzelf];
+      tikStuur(e, w[0], w[1], dt);
+      // terug naar je eigen land kan niet
+      e.y = richting > 0 ? Math.max(e.y, e.startY) : Math.min(e.y, e.startY);
+    } else e.y += richting * vY * dt;
     // zijwaarts sturen
     let doelX = e.x;
-    if (e.speler) { if (tikSpel.pointer) doelX = tikSpel.pointer.x; }
-    else {
+    if (!e.speler) {
       // zoek de plek in de breedte die het verst van de tikkers vóór je ligt
       const gevaar = ts.filter((t) => t.wacht <= 0 && (t.y - e.y) * richting > -0.08 && Math.abs(t.y - e.y) < 0.5);
       e.zwiep += dt * 3;
@@ -222,11 +245,14 @@ function tikBeweeg(dt) {
         doelX = beste;
       } else doelX = e.x + Math.sin(e.zwiep) * 0.1;
     }
-    const vX = e.speler ? 1.0 : 0.7;
-    e.x += Math.max(-vX * dt, Math.min(vX * dt, doelX - e.x));
+    if (!e.speler) e.x += Math.max(-0.6 * dt, Math.min(0.6 * dt, doelX - e.x));
     e.x = Math.max(TK.R, Math.min(1 - TK.R, e.x));
-    if ((richting > 0 && e.y >= doelY) || (richting < 0 && e.y <= doelY)) {
-      e.y = doelY; e.land = e.doel; e.doel = null;
+    const binnen = e.speler
+      ? (e.doel === "vies" ? e.y >= TK.H - TK.L + TK.R * 0.5 : e.y <= TK.L - TK.R * 0.5) // jij: zodra je in het land bent
+      : (richting > 0 && e.y >= doelY) || (richting < 0 && e.y <= doelY);
+    if (binnen) {
+      if (!e.speler) e.y = doelY;
+      e.land = e.doel; e.doel = null; e.vx = e.vy = 0;
       if (e.speler) {
         tikSpel.reeks++;
         const erbij = 10 + Math.min(tikSpel.reeks - 1, 5) * 2;
@@ -253,8 +279,15 @@ function tikTikkersBeweeg(dt) {
   ts.forEach((t, i) => {
     if (t.wacht > 0) t.wacht -= dt;
     let doel;
-    if (t.speler && tikSpel.fase === "ren") doel = tikSpel.pointer || t;
-    else if (t.wacht > 0) doel = { x: t.x, y: TK.H / 2 };
+    if (t.speler && tikSpel.fase === "ren" && !(t.wacht > 0)) {
+      // eigen tikker: slepen met vertraging; loslaten = afremmen
+      const w = naarVinger(t, SPELER_V.tikker) || [0, 0];
+      tikStuur(t, w[0], w[1], dt);
+      t.x = Math.max(TK.R, Math.min(1 - TK.R, t.x));
+      t.y = Math.max(TK.L + TK.R * 0.5, Math.min(TK.H - TK.L - TK.R * 0.5, t.y));
+      return;
+    }
+    if (t.wacht > 0) doel = { x: t.x, y: TK.H / 2 };
     else if (tikSpel.fase === "ren" && lopers.length) {
       // elke tikker kiest de dichtstbijzijnde loper (een beetje vooruit gemikt)
       const prooi = lopers.slice().sort((a, b) => tikAfstand(a, t) - tikAfstand(b, t))[i % Math.min(lopers.length, 2)];
@@ -262,7 +295,7 @@ function tikTikkersBeweeg(dt) {
       doel = { x: prooi.x, y: prooi.y + r * 0.12 };
     } else doel = { x: (i + 1) / (ts.length + 1), y: TK.H / 2 };
     const basis = Math.min(0.22 + tikSpel.ronde * 0.015, 0.36);
-    const v = t.speler ? 0.55 : t.wacht > 0 ? 0.3 : basis * (t.meisje ? 1 : 0.85) * (tikSpel.mode === "tikker" ? 0.75 : 1);
+    const v = t.wacht > 0 ? 0.3 : basis * (t.meisje ? 1 : 0.85) * (tikSpel.mode === "tikker" ? 0.75 : 1);
     const dx = doel.x - t.x, dy = doel.y - t.y, d = Math.hypot(dx, dy);
     if (d > 0.005) { const s = Math.min(d, v * dt); t.x += (dx / d) * s; t.y += (dy / d) * s; }
     t.x = Math.max(TK.R, Math.min(1 - TK.R, t.x));
@@ -293,8 +326,8 @@ function tikVerderAlsTikker() {
   $("#tikGetikt").hidden = true;
   tikSpel.mode = "tikker";
   tikSpel.fase = "ren";
-  tikSpel.pointer = null;
-  $("#tikHint").textContent = "👧 Nu ben jij een tikker! Tik of sleep in de bak om te tikken.";
+  tikSpel.vinger = null;
+  $("#tikHint").textContent = "👧 Nu ben jij een tikker! Sleep met je vinger om te tikken.";
   tikBalk();
 }
 
@@ -382,9 +415,13 @@ function tikTeken() {
     g.fillStyle = "#a3123f"; g.fillText(l, px, py + P(0.002));
   });
   // doelwijzer van de speler
-  if (tikSpel.pointer && tikSpel.fase === "ren") {
-    g.strokeStyle = "#ffd16699"; g.lineWidth = P(0.008);
-    g.beginPath(); g.arc(P(tikSpel.pointer.x), P(tikSpel.pointer.y), P(0.03), 0, 7); g.stroke();
+  if (tikSpel.vinger && tikSpel.fase === "ren") {
+    g.strokeStyle = "#ffd166cc"; g.lineWidth = P(0.008);
+    g.setLineDash([P(0.015), P(0.012)]);
+    const m = ik();
+    if (m) { g.beginPath(); g.moveTo(P(m.x), P(m.y)); g.lineTo(P(tikSpel.vinger.x), P(tikSpel.vinger.y)); g.stroke(); }
+    g.setLineDash([]);
+    g.beginPath(); g.arc(P(tikSpel.vinger.x), P(tikSpel.vinger.y), P(0.025), 0, 7); g.stroke();
   }
   // pony's: eerst ruiters, dan tikkers erbovenop
   [...renners(), ...tikkers()].forEach((e) => tikPony(g, e, P));
@@ -433,15 +470,19 @@ function tikPony(g, e, P) {
 function tikPointer(ev) {
   if (!tikSpel) return;
   const c = $("#tikVeld"), b = c.getBoundingClientRect();
-  tikSpel.pointer = { x: (ev.clientX - b.left) / b.width, y: ((ev.clientY - b.top) / b.height) * TK.H };
+  // bij aanraken mikt de pony net boven je vinger, zodat je hem blijft zien
+  const omhoog = ev.pointerType === "touch" ? 0.07 : 0;
+  tikSpel.vinger = { x: (ev.clientX - b.left) / b.width, y: ((ev.clientY - b.top) / b.height) * TK.H - omhoog };
 }
 
 (function tikKoppel() {
   const c = $("#tikVeld");
   let ingedrukt = false;
-  c.addEventListener("pointerdown", (ev) => { ingedrukt = true; tikPointer(ev); });
-  c.addEventListener("pointermove", (ev) => { if (ingedrukt || ev.pointerType === "mouse") tikPointer(ev); });
-  window.addEventListener("pointerup", () => (ingedrukt = false));
+  const los = () => { ingedrukt = false; if (tikSpel) tikSpel.vinger = null; };
+  c.addEventListener("pointerdown", (ev) => { ingedrukt = true; c.setPointerCapture(ev.pointerId); tikPointer(ev); });
+  c.addEventListener("pointermove", (ev) => { if (ingedrukt) tikPointer(ev); });
+  c.addEventListener("pointerup", los);
+  c.addEventListener("pointercancel", los);
   window.addEventListener("resize", () => { if (tikSpel) tikMaat(); });
   $("#tikAlsRuiter").onclick = tikKiesPony;
   $("#tikAlsTikker").onclick = () => tikNieuw("tikker");
