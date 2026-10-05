@@ -9,7 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#a3123f">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐴</text></svg>">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
   <header>
@@ -44,7 +44,10 @@
         <button class="modus klein" data-modus="puzzel"><span class="emoji">🧩</span><span><b>Pony-puzzel</b><small>Leg de foto en raad wie het is</small></span></button>
       </div>
       <h3 class="kopje">🎮 Spelletjes</h3>
-      <div class="modi twee">
+      <div class="modi">
+        <button class="modus uitgelicht" data-modus="tikspel"><span class="emoji">🏇</span><span><b>Vies land &amp; Lekker land</b><small>Het tikspel uit de bak! Ren met je pony naar lekker land of vies land, of wees zelf de tikker.</small></span></button>
+      </div>
+      <div class="modi twee" style="margin-top:12px">
         <button class="modus klein" data-modus="snel"><span class="emoji">⏱️</span><span><b>Snelle ronde</b><small>Zoveel mogelijk in 60 seconden!</small></span></button>
         <button class="modus klein" data-modus="memory"><span class="emoji">🃏</span><span><b>Memory</b><small>Zoek de foto bij de naam</small></span></button>
         <button class="modus klein" data-modus="mix"><span class="emoji">🎲</span><span><b>Grote mix</b><small>Van alles door elkaar</small></span></button>
@@ -154,6 +157,54 @@
       </div>
     </section>
 
+    <!-- TIKSPEL -->
+    <section id="tikspel" class="scherm">
+      <div id="tikStart" class="tikstart">
+        <h2 class="midden">🏇 Vies land &amp; Lekker land</h2>
+        <div class="regels">
+          <p>😋 Boven is <b>Lekker land</b>, 🤢 onder is <b>Vies land</b>.</p>
+          <p>👧 In het midden rijdt de <b>tikker</b>: een meisje op een pony. Zij roept iets, bijvoorbeeld <b>"Spruitjes!"</b></p>
+          <p>Vind je het lekker? Ren naar Lekker land. Vies? Dan naar Vies land. Pas op dat je niet getikt wordt!</p>
+          <p>Getikt? Dan ga je naar het midden en tik je mee. Wie het langst overblijft, wint! 🏆</p>
+        </div>
+        <p class="midden"><b>Wie wil jij zijn?</b></p>
+        <div class="modi twee">
+          <button class="modus klein" id="tikAlsRuiter"><span class="emoji">🏃</span><span><b>Ruiter</b><small>Kies je pony en ontwijk de tikker</small></span></button>
+          <button class="modus klein" id="tikAlsTikker"><span class="emoji">👧</span><span><b>Tikker</b><small>Roep iets en tik iedereen!</small></span></button>
+        </div>
+      </div>
+
+      <div id="tikPonyKeuze" hidden>
+        <h2 class="midden">Op welke pony rijd jij?</h2>
+        <button class="knop zacht" id="tikWillekeurig" style="width:100%;margin-bottom:12px">🎲 Kies maar een pony voor mij</button>
+        <div id="tikPonyLijst" class="stal"></div>
+      </div>
+
+      <div id="tikSpeelveld" hidden>
+        <div class="voortgang">
+          <span id="tikRonde">Ronde 1</span>
+          <span class="punten" style="margin-left:auto">⭐ <b id="tikPunten">0</b></span>
+          <span>🐴 <b id="tikOver">0</b></span>
+        </div>
+        <div id="tikRoep" class="tikroep"></div>
+        <div class="tikveld-houder"><canvas id="tikVeld"></canvas></div>
+        <p id="tikHint" class="tikhint"></p>
+        <div id="tikKnoppen" class="tikknoppen"></div>
+      </div>
+
+      <div id="tikGetikt" class="kaart-achter" hidden>
+        <div class="kaart midden">
+          <div style="font-size:3.5rem">😱</div>
+          <h2>Getikt!</h2>
+          <p id="tikGetiktTekst"></p>
+          <div class="knoppen">
+            <button class="knop" id="tikVerder">👧 Verder als tikker</button>
+            <button class="knop zacht" id="tikStoppen">🏁 Stoppen</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- EINDE -->
     <section id="einde" class="scherm">
       <div class="eindkaart">
@@ -191,6 +242,7 @@
 
   <script src="data.js?v=1"></script>
   <script src="vragen.js?v=2"></script>
-  <script src="app.js?v=4"></script>
+  <script src="app.js?v=5"></script>
+  <script src="tikspel.js?v=2"></script>
 </body>
 </html>

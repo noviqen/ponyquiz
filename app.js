@@ -14,7 +14,7 @@ const bewaar = () => localStorage.setItem(OPSLAG, JSON.stringify(staat));
 const MODI = {
   foto: "📸 Wie is dit?", weetje: "🔎 Wie ben ik?", trivia: "🧠 Pony-trivia", manege: "🏇 Manege-weetjes",
   mix: "🎲 Grote mix", snel: "⏱️ Snelle ronde", memory: "🃏 Memory",
-  waar: "✅ Klopt het?", hussel: "🔤 Hussel de naam", ruiter: "🎒 Maak de ruiter klaar", puzzel: "🧩 Pony-puzzel",
+  tikspel: "🏇 Vies & Lekker land", waar: "✅ Klopt het?", hussel: "🔤 Hussel de naam", ruiter: "🎒 Maak de ruiter klaar", puzzel: "🧩 Pony-puzzel",
 };
 const LAAG_IS_BETER = ["memory", "puzzel"];
 const PONY = Object.fromEntries(PONYS.map((p) => [p.naam, p]));
@@ -136,6 +136,7 @@ function rondeVragen(modus) {
 // ---------- quiz ----------
 function start(modus) {
   clearInterval(klok);
+  if (modus === "tikspel") return tikspelStart();
   if (modus === "memory") return memory();
   if (modus === "hussel") return hussel();
   if (modus === "ruiter") return ruiter();
@@ -615,7 +616,7 @@ function confetti(n) {
   }
 }
 
-const naarHome = () => { clearInterval(klok); telling(); toon("home"); };
+const naarHome = () => { clearInterval(klok); tikStop(); telling(); toon("home"); };
 document.querySelectorAll(".modus").forEach((b) => (b.onclick = () => (b.dataset.modus === "stal" ? stal() : start(b.dataset.modus))));
 $("#volgende").onclick = volgende;
 $("#husselHint").onclick = husselHint;

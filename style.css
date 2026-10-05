@@ -193,3 +193,23 @@ h2.midden { margin: 14px 0 10px; font-size: 1.3rem; }
 .stuk.gekozen { outline: 4px solid #ffd166; outline-offset: -4px; transform: scale(.94); z-index: 1; }
 .puzzelbord.af { gap: 0; padding: 0; animation: pop .5s; }
 .puzzelbord.af .stuk { border-radius: 0; outline: 0; }
+
+/* --- v4: Vies land & Lekker land --- */
+.modus.uitgelicht { background: linear-gradient(135deg, #fff 0%, #fff4d6 100%); border: 3px solid #ffd166; }
+.regels { background: #fff; border-radius: var(--rond); padding: 6px 16px; line-height: 1.5; box-shadow: 0 4px 14px #0001; }
+.tikroep { min-height: 64px; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 1.4rem; font-weight: 800; color: var(--rood); margin: 6px 0; }
+.tikroep:not(:empty) { animation: pop .5s; }
+.roep-emoji { font-size: 3rem; }
+.tikveld-houder { width: 100%; }
+#tikVeld { display: block; border-radius: 14px; touch-action: none; box-shadow: 0 6px 18px #0003; }
+.tikhint { text-align: center; font-weight: 700; color: var(--bruin); min-height: 1.5em; margin: 10px 0 6px; }
+.tikknoppen { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.tikkeuze { font-size: 1.3rem; min-height: 64px; }
+.tikkeuze.lekker { background: var(--groen); box-shadow: 0 4px 0 #1f6d3e; }
+.tikkeuze.vies { background: #8a7a3c; box-shadow: 0 4px 0 #5b4a1e; }
+.tikkeuze:disabled { opacity: .35; }
+.etenknop { width: calc(33.33% - 7px); background: #fff; border-radius: 14px; padding: 8px 4px; font-weight: 800; font-size: .9rem; box-shadow: 0 4px 0 #e6cdb8; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.etenknop span { font-size: 2rem; }
+.etenknop:active { transform: translateY(3px); box-shadow: 0 1px 0 #e6cdb8; }
+#tikGetikt .kaart { border-radius: 22px; margin: auto 12px; align-self: center; }
+#tikGetikt { align-items: center; }
